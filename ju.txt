@@ -1,0 +1,5 @@
+print("I Wan Smail size")
+a = 9
+b = 5
+c = a + b
+print(c)
