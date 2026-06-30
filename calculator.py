@@ -1,100 +1,174 @@
-import tkinter as tk
+from PySide6.QtWidgets import *
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 
 
-# สร้างหน้าต่าง
-root = tk.Tk()
+class Calculator(QWidget):
 
-root.title("Mac Python Calculator")
-root.geometry("350x500")
+    def __init__(self):
+        super().__init__()
 
+        self.setWindowTitle("Neon Calculator")
+        self.setFixedSize(400,600)
 
-# ช่องแสดงผล
-screen = tk.Entry(
-    root,
-    font=("Helvetica", 24),
-    justify="right"
-)
-
-screen.pack(
-    fill="x",
-    padx=10,
-    pady=10
-)
+        self.expression=""
 
 
-# เมื่อกดปุ่ม
-def press(value):
+        self.setStyleSheet("""
+        QWidget{
+            background:#080808;
+        }
 
-    if value == "=":
+        QLineEdit{
+            background:#111;
+            color:#00ffff;
+            border-radius:20px;
+            padding:20px;
+            font-size:40px;
+        }
 
-        try:
-            answer = eval(screen.get())
+        QPushButton{
 
-            screen.delete(0, tk.END)
-            screen.insert(0, str(answer))
+            background:#151515;
+            color:white;
+            border-radius:35px;
+            font-size:22px;
 
-        except:
-            screen.delete(0, tk.END)
-            screen.insert(0, "Error")
+        }
+
+        QPushButton:hover{
+
+            background:#00ffff;
+            color:black;
+
+        }
+
+        """)
 
 
-    elif value == "AC":
 
-        screen.delete(0, tk.END)
+        layout=QVBoxLayout()
 
 
-    else:
+        self.display=QLineEdit()
 
-        screen.insert(
-            tk.END,
-            value
+        self.display.setAlignment(
+            Qt.AlignRight
+        )
+
+        layout.addWidget(
+            self.display
+        )
+
+
+        buttons=[
+            "AC","(",")","÷",
+            "7","8","9","×",
+            "4","5","6","-",
+            "1","2","3","+",
+            "0",".","√","="
+        ]
+
+
+        grid=QGridLayout()
+
+
+        r=0
+        c=0
+
+
+        for text in buttons:
+
+            btn=QPushButton(text)
+
+            btn.setFixedSize(
+                75,75
+            )
+
+            btn.clicked.connect(
+                lambda checked=False,
+                t=text:self.press(t)
+            )
+
+
+            grid.addWidget(
+                btn,r,c
+            )
+
+
+            c+=1
+
+            if c==4:
+                c=0
+                r+=1
+
+
+        layout.addLayout(grid)
+
+        self.setLayout(layout)
+
+
+
+    def press(self,value):
+
+        if value=="AC":
+
+            self.expression=""
+
+
+        elif value=="=":
+
+            try:
+
+                exp=self.expression
+
+                exp=exp.replace(
+                    "×","*"
+                )
+
+                exp=exp.replace(
+                    "÷","/"
+                )
+
+
+                self.expression=str(
+                    eval(exp)
+                )
+
+
+            except:
+
+                self.expression="ERROR"
+
+
+
+        elif value=="√":
+
+            try:
+                self.expression=str(
+                    float(self.expression)**0.5
+                )
+
+            except:
+                pass
+
+
+        else:
+
+            self.expression+=value
+
+
+
+        self.display.setText(
+            self.expression
         )
 
 
 
-# ปุ่ม
-buttons = [
-    "7","8","9","/",
-    "4","5","6","*",
-    "1","2","3","-",
-    "0",".","=","+",
-    "AC"
-]
+app=QApplication([])
 
+window=Calculator()
 
-frame = tk.Frame(root)
-frame.pack()
+window.show()
 
-
-row = 0
-col = 0
-
-
-for b in buttons:
-
-    button = tk.Button(
-        frame,
-        text=b,
-        width=5,
-        height=2,
-        font=("Helvetica",18),
-        command=lambda x=b: press(x)
-    )
-
-    button.grid(
-        row=row,
-        column=col,
-        padx=5,
-        pady=5
-    )
-
-
-    col += 1
-
-    if col == 4:
-        col = 0
-        row += 1
-
-
-
-root.mainloop()
+app.exec()
